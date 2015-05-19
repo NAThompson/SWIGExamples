@@ -9,6 +9,7 @@
 *.o
 *.so
 *wrap.cxx
+swig_vector/example.py
 /bin
 /include
 lib64
