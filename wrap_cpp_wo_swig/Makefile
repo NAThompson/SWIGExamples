@@ -1,6 +1,6 @@
 all: say_hello.so
 
-say_hello.so: say_hello.o say_goodbye.o secret_message.o
+say_hello.so: say_hello.o say_goodbye.o secret_message.o return_vector.o
 	g++ -shared -Wl,--no-undefined -o $@ $^
 
 say_hello.o: say_hello.cpp
@@ -11,6 +11,9 @@ say_goodbye.o: say_goodbye.cpp
 
 secret_message.o: secret_message.cpp
 	g++ -fPIC -c $< -o $@
+
+return_vector.o: return_vector.cpp
+	g++ -std=c++11 -fPIC -c $< -o $@
 
 clean:
 	rm -f *.so *.o

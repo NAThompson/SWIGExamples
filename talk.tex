@@ -45,7 +45,16 @@ make -j8 && make install
     make
     ./say_hello.py
   \end{lstlisting}
+  Name mangling is a pain!
+  
+  Also, note how much the Python interpreter cares about your private methods!
 \end{frame}
+
+\begin{frame}
+  \frametitle{Using Mangled Symbols in ctypes is Untenable!}
+  Because the C++ type system is richer than ctypes can handle . . . 
+\end{frame}
+
 
 
 \end{document}

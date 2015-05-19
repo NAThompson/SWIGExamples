@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from ctypes import cdll, c_char_p
+from ctypes import cdll, c_char_p, c_double, c_void_p
 
 
 shared_obj = os.path.join(os.path.dirname(__file__), "say_hello.so")
@@ -21,3 +21,10 @@ print(goodbye())
 secret = say_hello_lib._ZN3foo11tell_secretEv
 secret.restype = c_char_p
 print(secret())
+
+vector = say_hello_lib.point3d
+
+# What is the right return type here?
+# vector.restype = c_double
+vector.restype = c_void_p
+print(vector())
