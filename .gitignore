@@ -8,9 +8,11 @@
 *.vrb
 *.o
 *.so
+*wrap.cxx
 /bin
 /include
 lib64
 /lib
 /man
 /share
+**/__pycache__

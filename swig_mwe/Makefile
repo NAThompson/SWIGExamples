@@ -8,4 +8,4 @@ all:
 	g++ -shared -L./ is_even_wrap.o -o _is_even.so -lis_even -Wl,-rpath='$$ORIGIN'
 
 clean:
-	rm -f *.o *wrap.cxx *.so
+	rm -f *.o *wrap.cxx *.so is_even.py

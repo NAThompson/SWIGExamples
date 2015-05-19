@@ -55,6 +55,52 @@ make -j8 && make install
   Because the C++ type system is richer than ctypes can handle . . . 
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{SWIG Minimal Working Example}
+  \begin{lstlisting}[language=bash]
+    cd swig_mwe;
+    swig_mwe$ make
+    swig_mwe$ python3
+    >>> import is_even
+    >>> dir(is_even)
+    ['__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', '_is_even', '_newclass', '_object', '_swig_getattr', '_swig_getattr_nondynamic', '_swig_property', '_swig_repr', '_swig_setattr', '_swig_setattr_nondynamic', 'is_even']
+    >>> is_even.is_even(5)
+    False
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{SWIG And C++ namespaces}
+  \begin{lstlisting}[language=bash]
+    cd swig_namespace;
+    swig_namespace$ make
+    swig_namespace$ python3
+    >>> import is_even
+    >>> dir(is_even)
+    ['__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', '_is_even', '_newclass', '_object', '_swig      _getattr', '_swig_getattr_nondynamic', '_swig_property', '_swig_repr', '_swig_setattr', '_swig_setattr_nondynamic', 'is_even']
+    >>> is_even.is_even(5)
+    False
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{SWIG and a C++ namespace clash}
+  ``If your program utilizes thousands of small deeply nested namespaces each with identical symbol names, well, then
+  you get what you deserve.`` --Swig documentation
+  \begin{lstlisting}[language=bash]
+    cd swig_namespace_clash
+    swig_namespace_clash$ make
+    swig_namespace_clash$ python3 -q
+    >>> import is_even
+    >>> dir(is_even)
+    ['__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', '_is_even', '_newclass', '_object', '_swig_getattr', '_swig_getattr_nondynamic', '_swig_property', '_swig_repr', '_swig_setattr', '_swig_setattr_nondynamic', 'bar_is_even', 'foo_is_even']
+    >>> is_even.bar_is_even(4)
+    True
+    >>> is_even.foo_is_even(4)
+    True
+   \end{lstlisting}
+\end{frame}
+
 
 
 \end{document}
