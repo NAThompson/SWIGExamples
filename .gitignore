@@ -16,3 +16,4 @@ lib64
 /man
 /share
 **/__pycache__
+**/is_even.py
