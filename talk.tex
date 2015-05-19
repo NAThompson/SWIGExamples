@@ -15,7 +15,6 @@ urlcolor=blue
 
 \frame{\titlepage} 
 
-\frame{\frametitle{Table of contents}\tableofcontents}
 
 \begin{frame}[fragile]
 \frametitle{Installation}
@@ -27,6 +26,13 @@ git clone --depth 1 https://github.com/swig/swig.git
 ./configure --prefix=/place/for/swig # or default: /usr/local/share
 make -j8 && make install
 \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Clone the examples}
+  \begin{lstlisting}[language=bash]
+    git clone https://github.com/NAThompson/SWIGExamples.git
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
