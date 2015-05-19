@@ -1,0 +1,51 @@
+\documentclass{beamer}
+\usepackage{listings}
+\usepackage{hyperref}
+\hypersetup{
+colorlinks=true,
+urlcolor=blue
+}
+
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true}
+
+\begin{document}
+\title{SWIG}
+\author{Nick Thompson} 
+\date{\today} 
+
+\frame{\titlepage} 
+
+\frame{\frametitle{Table of contents}\tableofcontents}
+
+\begin{frame}[fragile]
+\frametitle{Installation}
+
+\begin{lstlisting}[language=bash]
+sudo apt-get -y install libpcre3-dev byacc yodl
+git clone --depth 1 https://github.com/swig/swig.git
+./autogen.sh
+./configure --prefix=/place/for/swig # or default: /usr/local/share
+make -j8 && make install
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Wrapping C is Easy:}
+\begin{lstlisting}[language=bash]
+  cd wrap_pure_c;
+  make
+  ./say_hello.py
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Let's try to wrap some C++ without SWIG}
+  \begin{lstlisting}[language=bash]
+    cd wrap_cpp_wo_swip;
+    make
+    ./say_hello.py
+  \end{lstlisting}
+\end{frame}
+
+
+\end{document}

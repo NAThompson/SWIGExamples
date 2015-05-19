@@ -1,0 +1,16 @@
+*.log
+*.nav
+*.aux
+*.snm
+*.toc
+*.out
+*.cfg
+*.vrb
+*.o
+*.so
+/bin
+/include
+lib64
+/lib
+/man
+/share
