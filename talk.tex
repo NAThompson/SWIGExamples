@@ -72,12 +72,13 @@ make -j8 && make install
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Design of SWIG: Hammer the C++ into C code the Python interpreter uses}
+  \frametitle{Design of SWIG: Hammer the C++ into C code the Python interpreter cam use}
   \begin{itemize}
   \item Everything in Python is treated by the Python interpreter as a PyObject.
   \item A PyObject ``is a type which contains the information Python needs to a pointer to an object as an object''.
   \item So if we want to wrap a $\texttt{bool foo()}$, we create a new function returning $\texttt{PyObject}$ of type $\texttt{Py\_True}$ or $\texttt{Py\_False}$ . . . which are themselves PyObject*.
-  \item Generate code that we can use $\texttt{extern ``C''}$ on.
+  \item Generate code that we can use $\texttt{extern ``C''}$ on; build a Python extension module.
+  \item Will it work with Jython? (methinks no . . .)
   \end{itemize}
 \end{frame}
 
@@ -148,5 +149,18 @@ make -j8 && make install
 \end{frame}
 
 
+\begin{frame}[fragile]
+  \frametitle{How to wrap C++ templates}
+
+  Python doesn't use templates; nor does C. C++ templates are turned into assembly code at compile time, iff there exists a template instantiation.
+
+  So you must instantiate the templates to interface C++ and Python.
+
+  \begin{lstlisting}[language=bash]
+    cd swig_vector;
+    make
+  \end{lstlisting}
+
+\end{frame}
 
 \end{document}
