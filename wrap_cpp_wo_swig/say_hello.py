@@ -25,6 +25,6 @@ print(secret())
 vector = say_hello_lib.point3d
 
 # What is the right return type here?
-# vector.restype = c_double
-vector.restype = c_void_p
+vector.restype = c_double
+#vector.restype = c_void_p
 print(vector())

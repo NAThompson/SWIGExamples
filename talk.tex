@@ -61,6 +61,27 @@ make -j8 && make install
   Because the C++ type system is richer than ctypes can handle . . . 
 \end{frame}
 
+\begin{frame}
+  \frametitle{How would \emph{you} design a wrapper script for interfacing Python and C++?}
+  \begin{itemize}
+    \item C variables are passed by pointer or value.
+    \item C++ variables can be pass by pointer, value, reference, and rvalue reference, and const qualified to your heart's delight.
+    \item Python variables are passed by assignment (creation of references)
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Design of SWIG: Hammer the C++ into C code the Python interpreter uses}
+  \begin{itemize}
+  \item Everything in Python is treated by the Python interpreter as a PyObject.
+  \item A PyObject ``is a type which contains the information Python needs to a pointer to an object as an object''.
+  \item So if we want to wrap a $\texttt{bool foo()}$, we create a new function returning $\texttt{PyObject}$ of type $\texttt{Py\_True}$ or $\texttt{Py\_False}$ . . . which are themselves PyObject*.
+  \item Generate code that we can use $\texttt{extern ``C''}$ on.
+  \end{itemize}
+\end{frame}
+
+
 \begin{frame}[fragile]
   \frametitle{SWIG Minimal Working Example}
   \begin{lstlisting}[language=bash]
@@ -74,6 +95,25 @@ make -j8 && make install
     False
   \end{lstlisting}
 \end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Deep Mystery}
+  Why can we only call globally defined symbols from a shared object, and not locally defined symbols?
+  \begin{lstlisting}[language=bash]
+    swig_mwe$ nm _is_even.so | grep ``_wrap_is_even \|_init_''
+    00000000000020c0 T _init
+    000000000000629c t _wrap_is_even
+    swig_mwe$ python3 -q
+    >>> import os
+    >>> from ctypes import cdll
+    >>> so = cdll.LoadLibrary(os.path.join(os.getcwd(), ``_is_even.so'')))
+    >>> is_even = so._wrap_is_even
+    Symbol not found
+    >>> foo = so._init
+  \end{lstlisting}
+\end{frame}
+
+
 
 \begin{frame}[fragile]
   \frametitle{SWIG And C++ namespaces}

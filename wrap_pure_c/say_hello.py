@@ -22,5 +22,5 @@ libc = cdll.LoadLibrary("libc.so.6")
 # Annoying that this returns trash:
 dir(libc)
 
-# Challenge: What is wrong with the following code:
+# Challenge: What is wrong with the following code?
 libc.printf("We are calling printf from within Python\n")
