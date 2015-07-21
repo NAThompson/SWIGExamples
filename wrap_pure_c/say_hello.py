@@ -8,7 +8,7 @@ shared_obj = os.path.join(os.path.dirname(__file__), "say_hello.so")
 say_hello_lib = cdll.LoadLibrary(shared_obj)
 hello = say_hello_lib.say_hello
 
-# This screws up:
+# This screws up, because Python doesn't know how to interpret the result:
 print(hello())
 print(str(hello()))
 

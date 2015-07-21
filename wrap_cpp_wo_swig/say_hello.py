@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import ctypes
 from ctypes import cdll, c_char_p, c_double, c_void_p
 
 
@@ -25,6 +26,8 @@ print(secret())
 vector = say_hello_lib.point3d
 
 # What is the right return type here?
-vector.restype = c_double
-#vector.restype = c_void_p
-print(vector())
+#vector.restype = c_double
+vector.restype = c_void_p
+a = vector()
+print(dir(a))
+print(a[0])

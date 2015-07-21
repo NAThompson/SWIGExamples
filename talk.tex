@@ -22,6 +22,7 @@ urlcolor=blue
 \begin{lstlisting}[language=bash]
 sudo apt-get -y install libpcre3-dev byacc yodl
 git clone --depth 1 https://github.com/swig/swig.git
+cd swig
 ./autogen.sh
 ./configure --prefix=/place/for/swig # or default: /usr/local/share
 make -j8 && make install
@@ -45,20 +46,45 @@ make -j8 && make install
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Steps to Wrap C code}
+  \begin{itemize}
+  \item Compile the C code into a shared object.
+  \item Use ctypes to load the dll (.so)
+  \item Tell the Python interpreter how to interpret the output
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
   \frametitle{Let's try to wrap some C++ without SWIG}
   \begin{lstlisting}[language=bash]
-    cd wrap_cpp_wo_swip;
+    cd wrap_cpp_wo_swig;
     make
     ./say_hello.py
   \end{lstlisting}
-  Name mangling is a pain!
+  %Name mangling is a pain!
   
-  Also, note how much the Python interpreter cares about your private methods!
+  %Also, note how much the Python interpreter cares about your private methods!
 \end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Steps:}
+  \begin{itemize}
+  \item Compile the C++ into a shared object
+  \item Determine the mangled symbol name using nm (which is not guaranteed to be consistent across compilers!)
+  \item Use ctypes to interpret the return type (which might not be a primitive C type!)
+  \item Call the function (which might segfault as C++ does not have a well-defined application binary interface)
+  \end{itemize}
+
+  But you can call private methods using this technique . . .
+\end{frame}
+
 
 \begin{frame}
   \frametitle{Using Mangled Symbols in ctypes is Untenable!}
-  Because the C++ type system is richer than ctypes can handle . . . 
+  But note the \texttt{extern ``C''} trick which puts demangled symbols in the symbol table of the shared object.
+
+  Use this method if you can, but note the extern ``C'' rules (can't be in a namespace. . . infinitude of others that will cause cryptic linker errors.)
 \end{frame}
 
 \begin{frame}
@@ -72,16 +98,25 @@ make -j8 && make install
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Design of SWIG: Hammer the C++ into C code the Python interpreter cam use}
+  \frametitle{Design of SWIG: Hammer the C++ into C code the Python interpreter can use}
   \begin{itemize}
   \item Everything in Python is treated by the Python interpreter as a PyObject.
-  \item A PyObject ``is a type which contains the information Python needs to a pointer to an object as an object''.
+  \item A PyObject ``is a type which contains the information Python needs to treat a pointer to an object as an object''.
   \item So if we want to wrap a $\texttt{bool foo()}$, we create a new function returning $\texttt{PyObject}$ of type $\texttt{Py\_True}$ or $\texttt{Py\_False}$ . . . which are themselves PyObject*.
   \item Generate code that we can use $\texttt{extern ``C''}$ on; build a Python extension module.
   \item Will it work with Jython? (methinks no . . .)
   \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{An example \texttt{PyObject}: \texttt{Py\_True}}
+  \begin{itemize}
+  \item On my machine, found definition found in: /usr/include/python3.4/boolobject.h
+  \item Demonstrates use of garbage collection by reference counting: \texttt{Py\_INCREF(Py\_True)}
+  \item Following through to the \texttt{PyObject}, we see that it is a struct which acts essentially as an abstract base class for all Python types (see object.h)
+  \end{itemize}
+    
+\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{SWIG Minimal Working Example}
@@ -98,20 +133,48 @@ make -j8 && make install
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Deep Mystery}
-  Why can we only call globally defined symbols from a shared object, and not locally defined symbols?
-  \begin{lstlisting}[language=bash]
-    swig_mwe$ nm _is_even.so | grep ``_wrap_is_even \|_init_''
-    00000000000020c0 T _init
-    000000000000629c t _wrap_is_even
-    swig_mwe$ python3 -q
-    >>> import os
-    >>> from ctypes import cdll
-    >>> so = cdll.LoadLibrary(os.path.join(os.getcwd(), ``_is_even.so'')))
-    >>> is_even = so._wrap_is_even
-    Symbol not found
-    >>> foo = so._init
-  \end{lstlisting}
+  \frametitle{How does it work?}
+  \emph{Please remain calm.}
+  \begin{lstlisting}[language=c++]
+    #ifdef __cplusplus
+    extern ``C'' {
+      #endif
+      SWIGINTERN PyObject *_wrap_is_even(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+        PyObject *resultobj = 0;
+        int arg1 ;
+        int val1 ;
+        int ecode1 = 0 ;
+        PyObject * obj0 = 0 ;
+        bool result;
+
+        if (!PyArg_ParseTuple(args,(char *)''O:is_even'',&obj0)) SWIG_fail;
+        ecode1 = SWIG_AsVal_int(obj0, &val1);
+        if (!SWIG_IsOK(ecode1)) {
+          SWIG_exception_fail(SWIG_ArgError(ecode1), ``in method ''' ``is_even'' ``', argument `` ``1" of type ''' ``int"''');
+        }
+        arg1 = static_cast< int >(val1);
+        result = (bool)is_even(arg1);
+        resultobj = SWIG_From_bool(static_cast< bool >(result));
+        return resultobj;
+        fail:
+        return NULL;
+      }
+    \end{lstlisting}  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Steps:}
+  \begin{itemize}
+  \item Compile the source into a shared object.
+  \item Write a \texttt{foo.i} file, which tells swig what to wrap.
+  \item Use swig to generate a \emph{4000 line C++/C wrapper file} which demangles all symbols and casts everything into the appropriate inheritor of \texttt{PyObject}, as well as a Python script to load the module
+  \item Compile the C++/C wrapper into a shared object (same name as the source .so, with leading underscore)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Obvious in retrospect . . .}
+  You cannot compile your extension module linking against PythonX.Y and run it in PythonU.V! You code will work with one and only one Python interpreter, for each build.
 \end{frame}
 
 
@@ -130,6 +193,16 @@ make -j8 && make install
   \end{lstlisting}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Extern C and namespaces}
+  \begin{itemize}
+    \item Since C doesn't have namespaces, we must tell swig how to call the C++ code, within a namespace, by appropriate editing of foo.i.
+
+    \item Extern C can cause namespace clashes! (There was a reason for introducing this annoyance . . .)
+    \item Namespace clashes caused by swig's use of extern C must be resolved by the programmer.
+  \end{itemize}
+\end{frame}
+
 \begin{frame}[fragile]
   \frametitle{SWIG and a C++ namespace clash}
   ``If your program utilizes thousands of small deeply nested namespaces each with identical symbol names, well, then
@@ -144,10 +217,15 @@ make -j8 && make install
     >>> is_even.bar_is_even(4)
     True
     >>> is_even.foo_is_even(4)
-    True
    \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{SWIG and C++ namespace clashes}
+  \begin{itemize}
+    \item Resolve namespace clashes in your shared object using the ``rename'' functionality in SWIG (see swig\_namespace\_clash/is\_even.i).
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{How to wrap C++ templates}
